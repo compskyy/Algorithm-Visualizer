@@ -11,8 +11,6 @@ import javax.sound.midi.MidiSystem;
 import javax.sound.midi.Synthesizer;
 
 
-
-
 public class main
 {
     private volatile boolean sortingInProgress = false;
@@ -47,14 +45,18 @@ public class main
             }
         }).start();
     }
+    //Heap sort FIXME
+    void heapSort(int arr[], SelectionSortPanel panel) {
+        int n = arr.length;
+        int totalIterations = (n * (n - 1)) / 2;
+        int sleepDuration = 1000000 / totalIterations;
+
+        sortingInProgress = true;
+        
+    }
     
-    
-    
-    
-    
-    
-    //Sorting
-    void sort(int arr[], SelectionSortPanel panel) {
+    //Selection Sorting
+    void selectionSort(int arr[], SelectionSortPanel panel) {
         int n = arr.length;
         int totalIterations = (n * (n - 1)) / 2;
         int sleepDuration = 1000000 / totalIterations;
@@ -83,9 +85,32 @@ public class main
         sortingInProgress = false;
     }
     
-
+    void bubbleSort(int arr[], SelectionSortPanel panel) {
+        int n = arr.length;
+        int totalIterations = (n * (n - 1)) / 2;
+        int sleepDuration = 1000000 / totalIterations;
     
+        sortingInProgress = true;
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - 1 - i; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    int temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                }
     
+                // Update the panel and sleep
+                try {
+                    SwingUtilities.invokeAndWait(() -> panel.setArray(arr.clone()));
+                    this.playSound(arr[j] + 20);
+                    Thread.sleep(sleepDuration);
+                } catch (InterruptedException | InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        sortingInProgress = false;
+    }
     
 
 	// Prints the array
@@ -98,35 +123,56 @@ public class main
 	}
 
 	// Driver code to test above
-    public static void main(String args[])
-    {
-        // Create an array with numbers 1-200
-        int[] array = new int[200];
-        for (int i = 0; i < 200; i++) {
-            array[i] = i + 1;
-        }
-    
-        // Shuffle the array
-        shuffleArray(array);
-    
-        JFrame frame = new JFrame("Selection Sort Visualization");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
-    
-        SelectionSortPanel panel = new SelectionSortPanel(array);
-        frame.add(panel);
-        frame.setVisible(true);
-    
-        main ob = new main();
-        ob.sort(array, panel);
-        System.out.println("Sorted array");
-        ob.printArray(array);
+// Driver code to test above
+// Driver code to test above
+public static void main(String args[]) {
+    // Create an array with numbers 1-200
+    int[] array = new int[200];
+    for (int i = 0; i < 200; i++) {
+        array[i] = i + 1;
     }
+
+    // Shuffle the array
+    shuffleArray(array);
+
+    JFrame frame = new JFrame("Selection Sort Visualization");
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame.setSize(820, 700);
+
+    frame.setLayout(new GridLayout(2, 2)); // Use GridLayout to arrange panels in a 2x2 grid
+
+    main ob = new main();
+
+    // Create four SelectionSortPanel instances and add them to the frame
+    for (int i = 0; i < 4; i++) {
+        SelectionSortPanel panel = new SelectionSortPanel(array.clone());
+        frame.add(panel);
+    
+        // Run different sorting algorithms for each panel in a separate thread
+        if (i == 0) { // Selection Sort
+            new Thread(() -> ob.selectionSort(panel.getArray(), panel)).start();
+        } else if (i == 1) { // Bubble Sort
+            new Thread(() -> ob.bubbleSort(panel.getArray(), panel)).start();
+        }
+        // Add more sorting algorithms for other panel indices as needed
+    }
+    
+
+    frame.setVisible(true);
+    System.out.println("Sorted array");
+    ob.printArray(array);
+}
+
+
     
 }
 
 class SelectionSortPanel extends JPanel {
     private int[] array;
+
+    public int[] getArray() {
+        return this.array;
+    }
 
     public SelectionSortPanel(int[] array) {
         this.array = array;
@@ -155,3 +201,7 @@ class SelectionSortPanel extends JPanel {
         repaint();
     }
 }
+
+
+
+
